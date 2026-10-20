@@ -28,11 +28,13 @@ jobs:
         run: pip install -r requirements.txt
       - name: Compile source
         run: python -m compileall -q app run.py
+      
       - name: Run tests
         env:
           SECRET_KEY: ci-test-secret
           DATABASE_URL: sqlite:////tmp/phantomvault-ci.db
-                run: python -m pytest -q
+        run: python -m pytest -q
+
 
   deploy:
     name: Deploy to Render
