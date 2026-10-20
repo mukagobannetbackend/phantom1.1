@@ -32,7 +32,7 @@ jobs:
         env:
           SECRET_KEY: ci-test-secret
           DATABASE_URL: sqlite:////tmp/phantomvault-ci.db
-        run: pytest -q
+                run: python -m pytest -q
 
   deploy:
     name: Deploy to Render
