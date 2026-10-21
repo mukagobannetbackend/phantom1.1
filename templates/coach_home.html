@@ -1,0 +1,88 @@
+
+{% extends "base.html" %}
+
+{% block heading %}AI Trading Coach{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h2>Your Trading History</h2>
+    <p>
+        This coach summarises your saved trades, reviews, and journal entries.
+        It uses recorded evidence and does not assume that every loss was a bad trade.
+    </p>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span>Total trades</span>
+            <h3>{{ trade_count }}</h3>
+        </div>
+        <div class="stat-card">
+            <span>Saved AI reviews</span>
+            <h3>{{ review_count }}</h3>
+        </div>
+        <div class="stat-card">
+            <span>Wins recorded</span>
+            <h3>{{ wins }}</h3>
+        </div>
+        <div class="stat-card">
+            <span>Losses recorded</span>
+            <h3>{{ losses }}</h3>
+        </div>
+        <div class="stat-card">
+            <span>Open trades</span>
+            <h3>{{ open_trades }}</h3>
+        </div>
+        <div class="stat-card">
+            <span>Journal entries</span>
+            <h3>{{ journal_count }}</h3>
+        </div>
+    </div>
+</section>
+
+<section class="panel">
+    <h2>Recurring Lessons</h2>
+    {% if recurring_lessons %}
+        <ul>
+        {% for lesson, count in recurring_lessons %}
+            <li>{{ lesson }} <small>— recorded {{ count }} time(s)</small></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No recurring lessons found in your saved reviews yet.</p>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <h2>Recurring Mistakes to Review</h2>
+    {% if recurring_mistakes %}
+        <ul>
+        {% for mistake, count in recurring_mistakes %}
+            <li>{{ mistake }} <small>— recorded {{ count }} time(s)</small></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No recurring mistakes found in your saved reviews yet.</p>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <h2>Recent Trades</h2>
+    {% if trades %}
+        <ul>
+        {% for trade in trades[:10] %}
+            <li>
+                <a href="{{ url_for('main.trade_detail', trade_id=trade.id) }}">
+                    {{ trade.symbol }} — {{ trade.direction }}
+                </a>
+                <small>
+                    {{ trade.trade_date.strftime('%Y-%m-%d') if trade.trade_date else '' }}
+                    | Outcome: {{ trade.outcome or 'Not recorded' }}
+                </small>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No saved trades were found for your account.</p>
+    {% endif %}
+</section>
+{% endblock %}
