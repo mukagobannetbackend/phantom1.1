@@ -45,10 +45,15 @@ def create_app():
     def load_user(user_id):
         return db.session.get(User, int(user_id))
 
+ 
     from .auth import auth
     from .routes import main
     app.register_blueprint(auth)
     app.register_blueprint(main)
+
+    from .coach_routes import coach
+    app.register_blueprint(coach)
+
 
     @app.context_processor
     def inject_globals():
