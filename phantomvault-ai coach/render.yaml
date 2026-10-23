@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: phantomvault-pro
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT run:app
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: phantomvault-db
+          property: connectionString
+      - key: APP_BASE_URL
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_BASE_URL
+        sync: false
+      - key: AI_MODEL
+        value: gpt-4o-mini
+
+databases:
+  - name: phantomvault-db
+    plan: free
