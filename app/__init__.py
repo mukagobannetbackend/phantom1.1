@@ -28,7 +28,9 @@ def create_app():
     app = Flask(__name__, instance_relative_config=True, template_folder='../templates', static_folder='../static')
     app.config.update(
         SECRET_KEY=os.getenv('SECRET_KEY', 'dev-only-change-me'),
-        SQLALCHEMY_DATABASE_URI=normalize_db_url(os.getenv('DATABASE_URL')),
+        SQLALCHEMY_DATABASE_URI=normalize_db_url(
+    os.getenv('DATABASE_URL') or os.getenv('LOCAL_DATABASE_URL')
+),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         MAX_CONTENT_LENGTH=int(os.getenv('MAX_UPLOAD_MB', '12')) * 1024 * 1024,
         SESSION_COOKIE_HTTPONLY=True,

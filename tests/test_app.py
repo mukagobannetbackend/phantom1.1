@@ -88,3 +88,40 @@ def test_coach_creates_versioned_review(client, app):
         trade = db.session.get(Trade, trade_id)
         assert len(trade.reviews) == 1
         assert trade.reviews[0].version == 1
+
+
+def test_ai_coach_chat_uses_mock_response(client, app, monkeypatch):
+    from types import SimpleNamespace
+    import app.coach_routes as coach_routes
+
+    register(client)
+
+    class FakeOpenAI:
+        def __init__(self, api_key):
+            self.chat = SimpleNamespace(
+                completions=SimpleNamespace(create=self.fake_create)
+            )
+
+        def fake_create(self, **kwargs):
+            return SimpleNamespace(
+                choices=[
+                    SimpleNamespace(
+                        message=SimpleNamespace(
+                            content="Mock coach reply: wait for liquidity confirmation."
+                        )
+                    )
+                ]
+            )
+
+    monkeypatch.setattr(coach_routes, "OpenAI", FakeOpenAI)
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-real")
+
+    response = client.post(
+        "/coach/api/chat",
+        json={"message": "What confirmation should I wait for?"}
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["reply"] == (
+        "Mock coach reply: wait for liquidity confirmation."
+    )
