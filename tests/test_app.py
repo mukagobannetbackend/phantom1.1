@@ -125,3 +125,54 @@ def test_ai_coach_chat_uses_mock_response(client, app, monkeypatch):
     assert response.get_json()["reply"] == (
         "Mock coach reply: wait for liquidity confirmation."
     )
+
+def test_top_down_analysis_is_saved_and_shown_when_trade_reopens(client, app):
+    register(client)
+
+    # Create a trade first.
+    client.post(
+        '/trades/new',
+        data={'symbol': 'XAUUSD', 'direction': 'Short'},
+        follow_redirects=True
+    )
+
+    with app.app_context():
+        trade = Trade.query.filter_by(symbol='XAUUSD').first()
+        assert trade is not None
+        trade_id = trade.id
+
+    # Save the top-down analysis.
+    analysis_data = {
+        'daily_bias': 'Bearish',
+        'four_h_poi': '4H supply zone',
+        'protected_levels': 'Protected high above the zone',
+        'liquidity_objective': 'Sell-side liquidity',
+        'one_h_narrative': 'Wait for bearish continuation',
+        'fifteen_m_structure': '15M bearish MSS',
+        'confirmation_notes': 'Wait for sweep and FVG retracement',
+    }
+
+    response = client.post(
+        f'/trades/{trade_id}/analysis',
+        data=analysis_data,
+        follow_redirects=True
+    )
+
+    assert response.status_code == 200
+
+    # Check that the values were stored in the database.
+    with app.app_context():
+        trade = db.session.get(Trade, trade_id)
+        assert trade.analysis is not None
+        assert trade.analysis.daily_bias == 'Bearish'
+        assert trade.analysis.four_h_poi == '4H supply zone'
+        assert trade.analysis.confirmation_notes == (
+            'Wait for sweep and FVG retracement'
+        )
+
+    # Reopen the trade page and check that saved values are displayed.
+    reopened = client.get(f'/trades/{trade_id}')
+    assert reopened.status_code == 200
+    assert b'Bearish' in reopened.data
+    assert b'4H supply zone' in reopened.data
+    assert b'Wait for sweep and FVG retracement' in reopened.data
