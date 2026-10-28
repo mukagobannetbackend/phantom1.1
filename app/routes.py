@@ -68,6 +68,39 @@ def trade_detail(trade_id):
     if request.method=='POST': trade_from_form(trade); db.session.commit(); flash('Trade updated.', 'success'); return redirect(url_for('main.trade_detail', trade_id=trade.id))
     return render_template('trade_detail.html', trade=trade, latest_review=trade.reviews[-1] if trade.reviews else None)
 
+@main.route('/journal/<int:entry_id>/edit', methods=['POST'])
+@login_required
+def edit_journal(entry_id):
+    entry = JournalEntry.query.filter_by(
+        id=entry_id,
+        user_id=current_user.id
+    ).first_or_404()
+
+    notes = request.form.get('notes', '').strip()
+
+    if not notes:
+        flash('Journal notes cannot be empty.', 'error')
+    else:
+        entry.notes = notes
+        entry.entry_type = request.form.get(
+            'entry_type', entry.entry_type
+        )
+        entry.emotional_state = request.form.get(
+            'emotional_state', ''
+        ).strip()
+
+        db.session.commit()
+        flash('Journal entry updated successfully.', 'success')
+
+    return_to = request.form.get('return_to', '')
+    if return_to.startswith('/') and not return_to.startswith('//'):
+        return redirect(return_to)
+
+    return redirect(url_for(
+        'main.trade_detail',
+        trade_id=entry.trade_id
+    ))
+
 @main.route('/trades/<int:trade_id>/screenshots', methods=['POST'])
 @login_required
 def upload_screenshot(trade_id):

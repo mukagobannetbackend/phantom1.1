@@ -1,3 +1,53 @@
-{% extends 'base.html' %}{% block heading %}Trading journal{% endblock %}{% block content %}<section class="panel"><div class="section-head"><div><div class="eyebrow">NOTEBOOK INDEX</div><h3>All linked reflections</h3></div><a href="{{ url_for('main.trades') }}">Open a trade</a></div>{% for e in entries %}<article class="journal-entry"><div class="eyebrow">{{ e.entry_type|upper }} · {{ e.created_at.strftime('%d %b %Y %H:%M') }}</div><h3><a href="{{ url_for('main.trade_detail', trade_id=e.trade_id) }}">{{ e.trade.symbol }} · {{ e.trade.direction }}</a></h3><p>{{ e.notes }}</p>{% if e.emotional_state %}<span class="tag">{{ e.emotional_state }}</span>{% endif %}</article>{% else %}<div class="empty"><h3>No notes yet.</h3><p>Journal entries live inside each trade workspace.</p></div>{% endfor %}</section>{% endblock %}
+{% extends 'base.html' %}{% block heading %}Trading journal{% endblock %}{% block content %}<section class="panel"><div class="section-head"><div><div class="eyebrow">NOTEBOOK INDEX</div><h3>All linked reflections</h3></div><a href="{{ url_for('main.trades') }}">Open a trade</a></div>
+    {% for e in entries %}<article class="journal-entry">
+        <div class="eyebrow">{{ e.entry_type|upper }} · {{ e.created_at.strftime('%d %b %Y %H:%M') }}</div>
+        <h3><a href="{{ url_for('main.trade_detail', trade_id=e.trade_id) }}">{{ e.trade.symbol }} · {{ e.trade.direction }}</a></h3>
+        
+<p>{{ e.notes }}</p>
+
+<details>
+  <summary class="button">Edit this note</summary>
+
+  <form method="post"
+        action="{{ url_for('main.edit_journal', entry_id=e.id) }}">
+
+    <input type="hidden" name="csrf_token"
+           value="{{ csrf_token() }}">
+    <input type="hidden" name="return_to"
+           value="{{ request.path }}">
+
+    <label>Note type
+      <select name="entry_type">
+        <option value="premarket"
+          {% if e.entry_type == 'premarket' %}selected{% endif %}>
+          Premarket
+        </option>
+        <option value="during-trade"
+          {% if e.entry_type == 'during-trade' %}selected{% endif %}>
+          During trade
+        </option>
+        <option value="post-trade"
+          {% if e.entry_type == 'post-trade' %}selected{% endif %}>
+          Post-trade
+        </option>
+      </select>
+    </label>
+
+    <label>Edit notes
+      <textarea name="notes" required>{{ e.notes }}</textarea>
+    </label>
+
+    <label>Emotional state
+      <input name="emotional_state"
+             value="{{ e.emotional_state or '' }}">
+    </label>
+
+    <button class="button" type="submit">Save changes</button>
+  </form>
+</details>
+{% if e.emotional_state %}
+        <span class="tag">{{ e.emotional_state }}</span>{% endif %}</article>{% else %}<div class="empty">
+            <h3>No notes yet.</h3><p>Journal entries live inside each trade workspace.</p></div>{% endfor %}</section>
+            {% endblock %}
 
 {% block title %}Journal · {{ app_name }}{% endblock %}
