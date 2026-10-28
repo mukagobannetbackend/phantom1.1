@@ -50,7 +50,7 @@ class JournalEntry(db.Model):
 class TradeAnalysis(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     trade_id = db.Column(db.Integer, db.ForeignKey('trade.id'), unique=True, nullable=False)
-    daily_bias = db.Column(db.String(40)); four_h_poi = db.Column(db.Text); protected_levels = db.Column(db.Text)
+    daily_bias = db.Column(db.Text); four_h_poi = db.Column(db.Text); protected_levels = db.Column(db.Text)
     liquidity_objective = db.Column(db.Text); one_h_narrative = db.Column(db.Text); fifteen_m_structure = db.Column(db.Text)
     initial_mitigation = db.Column(db.Boolean, default=False); sweep = db.Column(db.Boolean, default=False); mss = db.Column(db.Boolean, default=False)
     fvg = db.Column(db.Boolean, default=False); retracement = db.Column(db.Boolean, default=False); confirmation_notes = db.Column(db.Text)
