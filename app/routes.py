@@ -68,6 +68,46 @@ def trade_detail(trade_id):
     if request.method=='POST': trade_from_form(trade); db.session.commit(); flash('Trade updated.', 'success'); return redirect(url_for('main.trade_detail', trade_id=trade.id))
     return render_template('trade_detail.html', trade=trade, latest_review=trade.reviews[-1] if trade.reviews else None)
 
+@main.route('/trades/<int:trade_id>/risk-outcome', methods=['POST'])
+@login_required
+def save_risk_outcome(trade_id):
+    trade = owned_trade(trade_id)
+
+    # Update only risk, outcome, and review fields.
+    numeric_fields = (
+        'entry',
+        'stop_loss',
+        'take_profit',
+        'position_size',
+        'planned_r',
+        'realized_r',
+        'fees',
+    )
+
+    for field in numeric_fields:
+        value = request.form.get(field, '').strip()
+        setattr(trade, field, ffloat(value) if value else None)
+
+    outcome = request.form.get('outcome', 'Open')
+    allowed_outcomes = {'Open', 'Win', 'Loss', 'Breakeven'}
+
+    if outcome not in allowed_outcomes:
+        flash('Invalid outcome selected.', 'error')
+        return redirect(url_for('main.trade_detail', trade_id=trade.id))
+
+    trade.outcome = outcome
+    trade.status = 'Open' if outcome == 'Open' else 'Closed'
+
+    trade.emotion = request.form.get('emotion', '').strip()
+    trade.exit_rationale = request.form.get('exit_rationale', '').strip()
+    trade.lessons = request.form.get('lessons', '').strip()
+    trade.rule_adherence = request.form.get('rule_adherence') == 'on'
+
+    db.session.commit()
+    flash('Risk & Outcome updated successfully.', 'success')
+
+    return redirect(url_for('main.trade_detail', trade_id=trade.id))
+
 @main.route('/journal/<int:entry_id>/edit', methods=['POST'])
 @login_required
 def edit_journal(entry_id):
@@ -100,7 +140,6 @@ def edit_journal(entry_id):
         'main.trade_detail',
         trade_id=entry.trade_id
     ))
-
 @main.route('/trades/<int:trade_id>/screenshots', methods=['POST'])
 @login_required
 def upload_screenshot(trade_id):
