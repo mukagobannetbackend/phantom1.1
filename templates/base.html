@@ -1,5 +1,13 @@
 <!doctype html><html lang="en" data-theme="{{ current_user.theme if current_user.is_authenticated else 'dark' }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>{% block title %}{{ app_name }}{% endblock %}</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}"></head><body><div class="app-shell">{% if current_user.is_authenticated %}<aside class="sidebar">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<meta name="theme-color" content="#101114">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PhantomVault">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+</head><body><div class="app-shell">{% if current_user.is_authenticated %}<aside class="sidebar">
     <a class="brand" href="{{ url_for('main.dashboard') }}"><span class="brand-mark">PV</span>
         <span>PHANTOM<span class="gold">VAULT</span></span></a><div class="eyebrow">TRADING WORKSPACE</div>
         <nav><a href="{{ url_for('main.dashboard') }}">Overview</a>
